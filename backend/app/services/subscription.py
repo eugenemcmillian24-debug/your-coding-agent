@@ -1,22 +1,38 @@
+import os
 import logging
 from ..services.db import get_conn
 from ..services.stripe_service import PLANS
 
 logger = logging.getLogger("forge_agent.subscription")
 
+ADMIN_EMAILS = set(
+    e.strip().lower()
+    for e in os.getenv("ADMIN_EMAILS", "").split(",")
+    if e.strip()
+)
+
 
 def check_subscription(email: str) -> dict:
     """Check if user has an active subscription and return plan details.
-    
+
     Returns dict with: subscribed, tier, builds_remaining, allowed_models
     """
     if not email:
         return {"subscribed": False, "tier": None, "builds_remaining": 0, "allowed_models": []}
 
+    # Admin bypass — unlimited premium access
+    if email.strip().lower() in ADMIN_EMAILS:
+        return {
+            "subscribed": True,
+            "tier": "premium",
+            "builds_remaining": -1,
+            "allowed_models": ["free", "go", "zen"],
+            "is_admin": True,
+        }
+
     with get_conn() as conn:
-        # Get subscription
         sub_row = conn.execute(
-            """SELECT tier, status FROM subscriptions 
+            """SELECT tier, status FROM subscriptions
                WHERE customer_email = %s AND status IN ('active', 'trialing')
                ORDER BY created_at DESC LIMIT 1""",
             (email,),
@@ -30,17 +46,11 @@ def check_subscription(email: str) -> dict:
         builds_limit = plan.get("builds_per_month", 0)
 
         if builds_limit == -1:
-            builds_remaining = -1  # unlimited
+            builds_remaining = -1
         else:
-            # Count builds this month
             count_row = conn.execute(
-                """SELECT COUNT(*) as cnt FROM jobs 
-                   WHERE created_at >= date_trunc('month', NOW())
-                   AND app_name IN (
-                       SELECT app_name FROM jobs j2 
-                       -- Link jobs to user by checking prompt or future user_id column
-                   )""",
-                # Simplified: in production, link jobs to users properly
+                """SELECT COUNT(*) as cnt FROM jobs
+                   WHERE created_at >= date_trunc('month', NOW())""",
             ).fetchone()
             used = dict(count_row)["cnt"] if count_row else 0
             builds_remaining = max(0, builds_limit - used)
@@ -55,7 +65,7 @@ def check_subscription(email: str) -> dict:
 
 def can_use_model(tier: str, model_id: str) -> bool:
     """Check if a subscription tier allows using a specific model."""
-    from ..services.provider_router import FREE_MODELS, ALL_MODELS
+    from ..services.provider_router import FREE_MODELS
 
     plan = PLANS.get(tier)
     if not plan:
@@ -63,11 +73,9 @@ def can_use_model(tier: str, model_id: str) -> bool:
 
     allowed = plan.get("models", [])
 
-    # Everyone can use free models
     if model_id in FREE_MODELS:
         return True
 
-    # Go models need starter+
     if "go" in allowed:
         return True
 

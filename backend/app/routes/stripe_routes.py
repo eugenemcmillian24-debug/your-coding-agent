@@ -13,6 +13,17 @@ logger = logging.getLogger("forge_agent.stripe_routes")
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
+# Admin emails get free unlimited access (premium tier equivalent)
+ADMIN_EMAILS = set(
+    e.strip().lower()
+    for e in os.getenv("ADMIN_EMAILS", "").split(",")
+    if e.strip()
+)
+
+
+def is_admin(email: str) -> bool:
+    return email.strip().lower() in ADMIN_EMAILS
+
 
 class CheckoutRequest(BaseModel):
     tier: str
@@ -43,6 +54,9 @@ def list_plans():
 @router.post("/checkout")
 def create_checkout(payload: CheckoutRequest):
     """Create a Stripe Checkout session."""
+    if is_admin(payload.email):
+        raise HTTPException(status_code=400, detail="Admin accounts don't need a subscription")
+
     if payload.tier not in PLANS:
         raise HTTPException(status_code=400, detail=f"Unknown tier: {payload.tier}")
 
@@ -181,6 +195,18 @@ def _handle_payment_failed(invoice: dict):
 @router.get("/subscription/{email}")
 def get_user_subscription(email: str):
     """Get subscription status for a user by email."""
+    # Admin bypass — unlimited premium access
+    if is_admin(email):
+        return {
+            "subscribed": True,
+            "tier": "premium",
+            "status": "active",
+            "customer_id": None,
+            "builds_per_month": -1,
+            "models": ["free", "go", "zen"],
+            "is_admin": True,
+        }
+
     with get_conn() as conn:
         row = conn.execute(
             "SELECT * FROM subscriptions WHERE customer_email = %s AND status IN ('active', 'trialing', 'past_due') ORDER BY created_at DESC LIMIT 1",
