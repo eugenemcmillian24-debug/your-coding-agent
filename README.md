@@ -18,7 +18,7 @@ AI-powered code generation → GitHub publishing → Cloudflare Pages deployment
                     └──────────────┘      └───────────┘     └────────────┘
 ```
 
-**Stack:** Python 3.12 · FastAPI · Celery · PostgreSQL 16 · Redis 7 · Next.js 15 · React 19 · Docker Compose
+**Stack:** Python 3.12 · FastAPI · Celery · PostgreSQL 16 · Redis 7 · Next.js 15 · React 19 · Docker Compose · Railway
 
 ## Quick Start
 
@@ -132,6 +132,21 @@ bash scripts/logs.sh
 # Stop everything
 bash scripts/stop.sh
 ```
+
+## Railway Deployment
+
+For production deployment on Railway, see [RAILWAY_SETUP.md](./RAILWAY_SETUP.md).
+
+### Quick Railway Setup
+
+1. Install Railway CLI: `npm i -g @railway/cli`
+2. Create a new project and add services (PostgreSQL, Redis, Backend, Worker)
+3. Configure environment variables
+4. Deploy with GitHub Actions or `railway up`
+
+### Environment Variables
+
+See [Environment Variables](#environment-variables) section above for required variables.
 
 ## Scripts
 
