@@ -1,6 +1,6 @@
 # Forge Agent
 
-AI-powered code generation → GitHub publishing → Vercel deployment pipeline.
+AI-powered code generation → GitHub publishing → Cloudflare Pages deployment pipeline.
 
 [![CI](https://github.com/eugenemcmillian24-debug/your-coding-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/eugenemcmillian24-debug/your-coding-agent/actions)
 
@@ -12,10 +12,10 @@ AI-powered code generation → GitHub publishing → Vercel deployment pipeline.
 │  (React 19) │     │  Backend     │     │  Worker   │     │  API    │
 └─────────────┘     └──────┬──────┘     └──────┬────┘     └─────────┘
                            │                    │
-                    ┌──────┴──────┐      ┌──────┴────┐     ┌─────────┐
-                    │  PostgreSQL  │      │   Redis    │     │ Vercel  │
-                    │  (state)     │      │  (broker)  │     │  API    │
-                    └──────────────┘      └───────────┘     └─────────┘
+                    ┌──────┴──────┐      ┌──────┴────┐     ┌────────────┐
+                    │  PostgreSQL  │      │   Redis    │     │ Cloudflare │
+                    │  (state)     │      │  (broker)  │     │   Pages    │
+                    └──────────────┘      └───────────┘     └────────────┘
 ```
 
 **Stack:** Python 3.12 · FastAPI · Celery · PostgreSQL 16 · Redis 7 · Next.js 15 · React 19 · Docker Compose
@@ -25,7 +25,7 @@ AI-powered code generation → GitHub publishing → Vercel deployment pipeline.
 ### Prerequisites
 - Docker & Docker Compose v2+
 - GitHub Personal Access Token (repo scope)
-- Vercel API Token (optional, for deployment)
+- Cloudflare API Token (for deployment)
 
 ### 1. Clone & configure
 
@@ -70,9 +70,18 @@ bash scripts/smoke-test.sh
 | `GITHUB_TOKEN` | Yes | GitHub PAT with repo scope |
 | `GITHUB_OWNER` | Yes | GitHub username or org |
 | `GITHUB_WEBHOOK_SECRET` | Yes | Secret for GitHub webhook verification |
-| `VERCEL_TOKEN` | Yes | Vercel API token |
-| `VERCEL_TEAM_ID` | No | Vercel team ID (if using team) |
-| `VERCEL_WEBHOOK_SECRET` | Yes | Secret for Vercel webhook verification |
+| `CLOUDFLARE_API_TOKEN` | Yes | Cloudflare API token with Pages permissions |
+| `CLOUDFLARE_ACCOUNT_ID` | Yes | Cloudflare account ID |
+| `CLOUDFLARE_WEBHOOK_SECRET` | Yes | Secret for Cloudflare webhook verification |
+
+### Cloudflare Setup
+
+1. Go to [Cloudflare Dashboard](https://dash.cloudflare.com/) → **API Tokens** → Create Token
+2. Use the **Edit Cloudflare Workers** template or create a custom token with:
+   - `Account.Cloudflare Pages: Edit`
+   - `Account.Account Settings: Read`
+3. Copy your **Account ID** from the dashboard sidebar
+4. Set a webhook secret for deploy event verification
 
 ## API Reference
 
@@ -96,7 +105,7 @@ bash scripts/smoke-test.sh
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/webhooks/github` | GitHub webhook receiver |
-| `POST` | `/api/webhooks/vercel` | Vercel webhook receiver |
+| `POST` | `/api/webhooks/cloudflare` | Cloudflare Pages webhook receiver |
 
 ### Health
 
