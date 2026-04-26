@@ -25,8 +25,11 @@ async def lifespan(app: FastAPI):
     """Startup/shutdown lifecycle."""
     missing = validate_env()
     if missing:
-        raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
-    init_db()
+        logger.error(f"Missing required environment variables: {', '.join(missing)}")
+    try:
+        init_db()
+    except Exception as e:
+        logger.error(f"DB init failed: {e}")
     logger.info("Forge Agent v22 started successfully")
     yield
     logger.info("Forge Agent shutting down")
