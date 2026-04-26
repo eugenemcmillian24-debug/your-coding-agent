@@ -16,5 +16,19 @@ def required_env_keys() -> List[str]:
     ]
 
 
+def optional_env_keys() -> List[str]:
+    """Keys that are useful but not required for startup."""
+    return [
+        "DIRECT_DATABASE_URL",
+        "SUPABASE_URL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "OPENCODE_API_KEY",
+        "OPENCODE_BASE_URL",
+        "OPENCODE_GO_MODEL",
+        "OPENCODE_ZEN_MODEL",
+    ]
+
+
 def validate_env() -> List[str]:
     return [key for key in required_env_keys() if not os.getenv(key)]
