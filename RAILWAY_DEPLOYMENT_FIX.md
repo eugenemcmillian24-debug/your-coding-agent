@@ -73,3 +73,7 @@ Required environment variables for Railway deployment:
 - `GITHUB_TOKEN` - GitHub API token for repository operations
 - `CLOUDFLARE_API_TOKEN` - Cloudflare API token for deployment
 - `CLOUDFLARE_ACCOUNT_ID` - Cloudflare account ID
+- `STRIPE_SECRET_KEY` - Stripe API secret key
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
+- `ADMIN_EMAILS` - Comma-separated admin emails
+- `FRONTEND_URL` - Frontend application URL

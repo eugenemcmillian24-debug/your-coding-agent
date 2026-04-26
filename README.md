@@ -73,6 +73,10 @@ bash scripts/smoke-test.sh
 | `CLOUDFLARE_API_TOKEN` | Yes | Cloudflare API token with Pages permissions |
 | `CLOUDFLARE_ACCOUNT_ID` | Yes | Cloudflare account ID |
 | `CLOUDFLARE_WEBHOOK_SECRET` | Yes | Secret for Cloudflare webhook verification |
+| `STRIPE_SECRET_KEY` | Yes | Stripe API secret key for subscriptions |
+| `STRIPE_WEBHOOK_SECRET` | Yes | Stripe webhook signing secret |
+| `ADMIN_EMAILS` | No | Comma-separated admin emails (get free unlimited access) |
+| `FRONTEND_URL` | Yes | Frontend application URL for Stripe redirects |
 
 ### Cloudflare Setup
 
@@ -82,6 +86,17 @@ bash scripts/smoke-test.sh
    - `Account.Account Settings: Read`
 3. Copy your **Account ID** from the dashboard sidebar
 4. Set a webhook secret for deploy event verification
+
+### Stripe Setup
+
+1. Go to [Stripe Dashboard](https://dashboard.stripe.com/) → **Developers** → **API keys**
+2. Copy your **Secret key** (starts with `sk_live_` for production, `sk_test_` for testing)
+3. Go to **Webhooks** → **Add endpoint** to create a webhook:
+   - Endpoint URL: `https://your-backend.railway.app/api/webhooks/stripe`
+   - Select events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.payment_failed`
+   - Copy the **Signing secret** (starts with `whsec_`)
+4. Configure subscription prices/tiers in Stripe Products
+5. Set `ADMIN_EMAILS` to grant free unlimited access to specific users (comma-separated)
 
 ## API Reference
 
@@ -106,6 +121,16 @@ bash scripts/smoke-test.sh
 |--------|----------|-------------|
 | `POST` | `/api/webhooks/github` | GitHub webhook receiver |
 | `POST` | `/api/webhooks/cloudflare` | Cloudflare Pages webhook receiver |
+
+### Stripe
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/stripe/plans` | List available subscription plans |
+| `POST` | `/api/stripe/checkout` | Create Stripe checkout session |
+| `POST` | `/api/stripe/portal` | Create billing portal session |
+| `POST` | `/api/webhooks/stripe` | Stripe webhook receiver |
+| `GET` | `/api/stripe/subscription/{email}` | Get subscription status for user |
 
 ### Health
 

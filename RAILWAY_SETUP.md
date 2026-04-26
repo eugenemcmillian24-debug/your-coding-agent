@@ -20,6 +20,10 @@ In Railway, set the following environment variables:
 - `CLOUDFLARE_API_TOKEN` - Cloudflare API token
 - `CLOUDFLARE_ACCOUNT_ID` - Cloudflare account ID
 - `CLOUDFLARE_WEBHOOK_SECRET` - Secret for Cloudflare webhook verification
+- `STRIPE_SECRET_KEY` - Stripe API secret key for subscription management
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret for event verification
+- `ADMIN_EMAILS` - Comma-separated list of admin emails (get free unlimited access)
+- `FRONTEND_URL` - Frontend application URL for Stripe redirects
 
 ### Optional
 - `OPENCODE_API_KEY` - API key for AI provider
@@ -73,6 +77,10 @@ railway variables set GITHUB_WEBHOOK_SECRET="your-webhook-secret"
 railway variables set CLOUDFLARE_API_TOKEN="your-cloudflare-token"
 railway variables set CLOUDFLARE_ACCOUNT_ID="your-account-id"
 railway variables set CLOUDFLARE_WEBHOOK_SECRET="your-cloudflare-webhook-secret"
+railway variables set STRIPE_SECRET_KEY="sk_live_..."
+railway variables set STRIPE_WEBHOOK_SECRET="whsec_..."
+railway variables set ADMIN_EMAILS="admin@example.com,owner@example.com"
+railway variables set FRONTEND_URL="https://your-frontend.vercel.app"
 ```
 
 ### 4. Deploy
