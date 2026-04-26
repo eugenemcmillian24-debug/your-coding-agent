@@ -31,8 +31,9 @@ jobs:
       GITHUB_TOKEN: test-token
       GITHUB_OWNER: test-owner
       GITHUB_WEBHOOK_SECRET: test-secret
-      VERCEL_TOKEN: test-token
-      VERCEL_WEBHOOK_SECRET: test-secret
+      CLOUDFLARE_API_TOKEN: test-token
+      CLOUDFLARE_ACCOUNT_ID: test-account
+      CLOUDFLARE_WEBHOOK_SECRET: test-secret
 
     steps:
       - uses: actions/checkout@v4

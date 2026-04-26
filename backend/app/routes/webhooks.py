@@ -1,29 +1,38 @@
+import logging
 from fastapi import APIRouter, Request, HTTPException
-from ..services.webhooks import verify_github_signature, verify_vercel_signature, record_webhook_event
+from ..services.webhooks import verify_github_signature, verify_cloudflare_signature, record_webhook_event
+
 router = APIRouter()
-@router.post('/github')
+logger = logging.getLogger("forge_agent.routes.webhooks")
+
+
+@router.post("/github")
 async def github_webhook(request: Request):
+    """Receive and verify GitHub webhook events."""
     body = await request.body()
     headers = dict(request.headers)
     try:
         verify_github_signature(headers, body)
         verified = True
     except Exception as e:
-        verified = False
+        logger.warning("GitHub webhook verification failed: %s", e)
         raise HTTPException(status_code=403, detail=str(e))
     payload = await request.json()
-    record_webhook_event('github', headers.get('x-github-event', ''), headers.get('x-github-delivery', ''), payload, verified)
-    return {'ok': True, 'verified': verified}
-@router.post('/vercel')
-async def vercel_webhook(request: Request):
+    record_webhook_event("github", headers.get("x-github-event", ""), headers.get("x-github-delivery", ""), payload, verified)
+    return {"ok": True, "verified": verified}
+
+
+@router.post("/cloudflare")
+async def cloudflare_webhook(request: Request):
+    """Receive and verify Cloudflare Pages webhook events."""
     body = await request.body()
     headers = dict(request.headers)
     try:
-        verify_vercel_signature(headers, body)
+        verify_cloudflare_signature(headers, body)
         verified = True
     except Exception as e:
-        verified = False
+        logger.warning("Cloudflare webhook verification failed: %s", e)
         raise HTTPException(status_code=403, detail=str(e))
     payload = await request.json()
-    record_webhook_event('vercel', headers.get('x-vercel-event', ''), headers.get('x-vercel-id', ''), payload, verified)
-    return {'ok': True, 'verified': verified}
+    record_webhook_event("cloudflare", payload.get("event", ""), payload.get("id", ""), payload, verified)
+    return {"ok": True, "verified": verified}

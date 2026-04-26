@@ -6,7 +6,7 @@ from .state_machine import set_state
 from .audit import write_audit
 from .idempotency import reserve
 from .github_service import create_repo, create_branch, push_files, create_pr, list_reviews
-from .vercel_service import create_project, set_env, create_deployment, get_deployment
+from .cloudflare_service import create_pages_project, set_env_vars, create_deployment, get_deployment
 
 logger = logging.getLogger("forge_agent.pipeline")
 
@@ -81,32 +81,36 @@ async def _publish_to_github(job_id: str, job: dict, files: list) -> str | None:
     return pr_url
 
 
-async def _deploy_to_vercel(job_id: str, job: dict) -> dict:
-    """Deploy to Vercel. Returns deployment info."""
-    import os
+async def _deploy_to_cloudflare(job_id: str, job: dict) -> dict:
+    """Deploy to Cloudflare Pages. Returns deployment info."""
     repo_name = job["repo_name"]
-    owner = os.getenv("GITHUB_OWNER", "")
 
-    set_state(job_id, "deploying", "Deploying to Vercel")
+    set_state(job_id, "deploying", "Deploying to Cloudflare Pages")
 
-    project = await create_project(repo_name, repo=f"{owner}/{repo_name}")
-    save_run(job_id, "vercel_project", project)
+    # Create or ensure the Pages project exists
+    project = await create_pages_project(repo_name)
+    save_run(job_id, "cloudflare_project", project)
 
-    env_result = await set_env(repo_name, "EXAMPLE_KEY", "example-value", target="preview")
-    save_run(job_id, "vercel_env", env_result)
+    # Set environment variables
+    env_result = await set_env_vars(repo_name, {"EXAMPLE_KEY": "example-value"}, target="production")
+    save_run(job_id, "cloudflare_env", env_result)
 
-    deployment = await create_deployment(repo_name, repo=f"{owner}/{repo_name}")
-    save_run(job_id, "vercel_deployment", deployment)
+    # Trigger deployment
+    deployment = await create_deployment(repo_name, branch=job.get("branch_name", "main"))
+    save_run(job_id, "cloudflare_deployment", deployment)
 
     dep = deployment.get("data", {}) if isinstance(deployment, dict) else {}
-    dep_id = dep.get("id")
-    dep_url = dep.get("url")
+    result_data = dep.get("result", {}) if isinstance(dep, dict) else {}
+    dep_id = result_data.get("id") or dep.get("id")
+    dep_url = result_data.get("url") or dep.get("url")
     dep_state = None
 
     if dep_id:
-        dep_status = await get_deployment(dep_id)
-        save_run(job_id, "vercel_deployment_status", dep_status)
-        dep_state = (dep_status.get("data") or {}).get("readyState") if isinstance(dep_status, dict) else None
+        dep_status = await get_deployment(repo_name, dep_id)
+        save_run(job_id, "cloudflare_deployment_status", dep_status)
+        status_data = dep_status.get("data", {}) if isinstance(dep_status, dict) else {}
+        status_result = status_data.get("result", {}) if isinstance(status_data, dict) else {}
+        dep_state = status_result.get("latest_stage", {}).get("name") if isinstance(status_result, dict) else None
 
     update_job(
         job_id,
@@ -142,9 +146,9 @@ async def run_async(job_id: str):
         if reserve(job_id, "publish", f"{job_id}:publish"):
             await _publish_to_github(job_id, job, files)
 
-        # Stage 3: Deploy to Vercel
+        # Stage 3: Deploy to Cloudflare Pages
         if reserve(job_id, "deploy", f"{job_id}:deploy"):
-            await _deploy_to_vercel(job_id, job)
+            await _deploy_to_cloudflare(job_id, job)
 
         # Done
         update_job(job_id, status="complete")
