@@ -12,6 +12,7 @@ class CreateJobRequest(BaseModel):
     app_name: str = Field(..., min_length=1, max_length=200, description="Application name")
     prompt: str = Field(..., min_length=1, max_length=10000, description="Build prompt")
     provider: Provider = Provider.OPENCODE_GO
+    model: Optional[str] = Field(None, max_length=50, description="Specific model ID override (e.g. kimi-k2.6, nemotron-3-super-free)")
     repo_name: Optional[str] = Field(None, max_length=100, pattern=r"^[a-z0-9][a-z0-9._-]*$")
 
 

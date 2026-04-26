@@ -6,6 +6,7 @@ from ..models import CreateJobRequest, JobResponse
 from ..services.db import get_conn
 from ..services.state_machine import set_state, get_state
 from ..services.audit import write_audit
+from ..services.provider_router import list_available_models
 from ..tasks import run_job
 
 router = APIRouter()
@@ -23,20 +24,27 @@ def create_job(payload: CreateJobRequest):
     with get_conn() as conn:
         conn.execute(
             """INSERT INTO jobs
-               (id, app_name, prompt, provider, status, repo_name, branch_name,
+               (id, app_name, prompt, provider, model, status, repo_name, branch_name,
                 pr_url, deployment_id, deployment_url, deployment_state,
                 repair_attempts, created_at, updated_at)
-               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
             (job_id, payload.app_name, payload.prompt, payload.provider.value,
-             "queued", repo_name, branch_name, None, None, None, None, 0, now, now),
+             payload.model, "queued", repo_name, branch_name,
+             None, None, None, None, 0, now, now),
         )
 
     set_state(job_id, "queued", "Queued in Celery")
     write_audit(job_id, "job_created", payload.model_dump())
     run_job.delay(job_id)
 
-    logger.info("Job %s queued for %s", job_id, payload.app_name)
+    logger.info("Job %s queued for %s (model=%s)", job_id, payload.app_name, payload.model or "auto")
     return JobResponse(job_id=job_id, state=get_state(job_id))
+
+
+@router.get("/models")
+def get_models():
+    """List available AI models for the frontend selector."""
+    return list_available_models()
 
 
 @router.get("")
