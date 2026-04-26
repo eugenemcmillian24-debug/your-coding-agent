@@ -1,4 +1,5 @@
 import logging
+from fastapi import HTTPException
 from .db import get_conn
 from ..tasks import run_job
 
@@ -16,6 +17,10 @@ def list_stuck_jobs() -> list[dict]:
 
 def replay_job(job_id: str) -> dict:
     """Re-queue a job for pipeline replay."""
+    with get_conn() as conn:
+        row = conn.execute("SELECT id FROM jobs WHERE id = %s", (job_id,)).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Job not found")
     logger.info("Replaying job %s", job_id)
     run_job.delay(job_id)
     return {"replayed": True, "job_id": job_id}
