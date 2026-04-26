@@ -20,6 +20,8 @@ TRANSITIONS = {
     "reviewing": {"deploying", "failed"},
     "deploying": {"finalizing", "complete", "failed"},
     "finalizing": {"complete", "failed"},
+    # Allow retry from failed state — Celery auto-retry resets the pipeline
+    "failed": {"queued", "generated", "publishing", "deploying"},
 }
 
 
