@@ -3,10 +3,11 @@ import os, json, httpx
 def _provider_config(provider: str):
     provider = (provider or os.getenv('DEFAULT_PROVIDER', 'opencode-go')).lower()
     base = os.getenv('OPENCODE_BASE_URL', '').rstrip('/')
-    key = os.getenv('OPENCODE_API_KEY')
     small_model = os.getenv('OPENCODE_SMALL_MODEL', '')
     if provider == 'opencode-zen':
+        key = os.getenv('OPENCODE_ZEN_API_KEY') or os.getenv('OPENCODE_API_KEY')
         return {'provider': 'opencode-zen', 'model': os.getenv('OPENCODE_ZEN_MODEL', ''), 'small_model': small_model, 'base_url': base, 'api_key': key}
+    key = os.getenv('OPENCODE_GO_API_KEY') or os.getenv('OPENCODE_API_KEY')
     return {'provider': 'opencode-go', 'model': os.getenv('OPENCODE_GO_MODEL', ''), 'small_model': small_model, 'base_url': base, 'api_key': key}
 
 async def generate_text(provider: str, system_prompt: str, user_prompt: str, use_small: bool = False) -> str:
