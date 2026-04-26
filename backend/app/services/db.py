@@ -1,12 +1,28 @@
 import os
+import ssl
+import logging
 import psycopg
 from psycopg.rows import dict_row
 from psycopg_pool import ConnectionPool
 from contextlib import contextmanager
 
+logger = logging.getLogger("forge_agent.db")
+
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://forge:forge@postgres:5432/forge_agent")
 
 _pool: ConnectionPool | None = None
+
+
+def _pool_kwargs() -> dict:
+    """Build connection kwargs — add SSL if connecting to Supabase/external host."""
+    kwargs = {"row_factory": dict_row}
+
+    # Detect external DB (Supabase pooler or direct) by host pattern
+    if "supabase" in DATABASE_URL or "pooler" in DATABASE_URL:
+        kwargs["sslmode"] = "require"
+        logger.info("SSL mode enabled for external database connection")
+
+    return kwargs
 
 
 def get_pool() -> ConnectionPool:
@@ -17,8 +33,9 @@ def get_pool() -> ConnectionPool:
             DATABASE_URL,
             min_size=2,
             max_size=10,
-            kwargs={"row_factory": dict_row},
+            kwargs=_pool_kwargs(),
         )
+        logger.info("Connection pool initialized (min=2, max=10)")
     return _pool
 
 
@@ -106,3 +123,4 @@ def init_db():
         conn.execute("""
             CREATE INDEX IF NOT EXISTS idx_webhook_events_source ON webhook_events(source)
         """)
+        logger.info("Database tables initialized")
