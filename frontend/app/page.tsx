@@ -15,6 +15,7 @@ type Job = {
 type Subscription = {
   subscribed: boolean; tier: string | null; status?: string;
   customer_id?: string; builds_per_month?: number; models?: string[];
+  is_admin?: boolean;
 }
 
 export default function Home() {
@@ -22,6 +23,7 @@ export default function Home() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [email, setEmail] = useState('')
   const [subscription, setSubscription] = useState<Subscription | null>(null)
+  const [loading, setLoading] = useState(false)
 
   // Builder state
   const [appName, setAppName] = useState('Real Integration Builder')
@@ -33,7 +35,6 @@ export default function Home() {
 
   useEffect(() => {
     fetch(`${API}/api/stripe/plans`).then(r => r.json()).then(setPlans).catch(() => {})
-    // Check URL params for checkout result
     const params = new URLSearchParams(window.location.search)
     if (params.get('checkout') === 'success') {
       setView('builder')
@@ -52,11 +53,16 @@ export default function Home() {
 
   async function checkSubscription() {
     if (!email) return
-    const r = await fetch(`${API}/api/stripe/subscription/${encodeURIComponent(email)}`)
-    const data = await r.json()
-    setSubscription(data)
-    if (!data.subscribed) {
-      alert('No active subscription found for this email. Choose a plan below.')
+    setLoading(true)
+    try {
+      const r = await fetch(`${API}/api/stripe/subscription/${encodeURIComponent(email)}`)
+      const data = await r.json()
+      setSubscription(data)
+      if (!data.subscribed) {
+        alert('No active subscription found for this email. Choose a plan below.')
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -120,8 +126,8 @@ export default function Home() {
         <div style={{ ...card, maxWidth: 500, margin: '0 auto 40px', display: 'flex', gap: 12 }}>
           <input value={email} onChange={e => setEmail(e.target.value)} style={{ ...field, flex: 1 }}
             placeholder="your@email.com" type="email" onKeyDown={e => e.key === 'Enter' && checkSubscription()} />
-          <button onClick={checkSubscription} style={{ ...btn, background: '#475569', whiteSpace: 'nowrap' }}>
-            Sign In
+          <button onClick={checkSubscription} disabled={loading} style={{ ...btn, background: '#475569', whiteSpace: 'nowrap' }}>
+            {loading ? 'Checking...' : 'Sign In'}
           </button>
         </div>
 
@@ -166,7 +172,7 @@ export default function Home() {
     )
   }
 
-  // ── Builder View (subscribed) ──
+  // ── Builder View (subscribed or admin) ──
   return (
     <main style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -175,15 +181,25 @@ export default function Home() {
           <p style={{ margin: 0, color: '#94a3b8' }}>GitHub + Cloudflare Pages deployment pipeline</p>
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <span style={{
-            background: tierColors[subscription.tier || 'basic'], color: '#0f172a',
-            padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700,
-            textTransform: 'uppercase',
-          }}>{subscription.tier}</span>
+          {subscription?.is_admin ? (
+            <span style={{
+              background: '#ef4444', color: '#fff',
+              padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700,
+              textTransform: 'uppercase',
+            }}>⚡ Admin</span>
+          ) : (
+            <span style={{
+              background: tierColors[subscription?.tier || 'basic'], color: '#0f172a',
+              padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700,
+              textTransform: 'uppercase',
+            }}>{subscription?.tier}</span>
+          )}
           <span style={{ color: '#94a3b8', fontSize: 13 }}>{email}</span>
-          <button onClick={openPortal} style={{ ...btn, background: '#334155', fontSize: 13, padding: '6px 12px' }}>
-            Manage Plan
-          </button>
+          {!subscription?.is_admin && (
+            <button onClick={openPortal} style={{ ...btn, background: '#334155', fontSize: 13, padding: '6px 12px' }}>
+              Manage Plan
+            </button>
+          )}
         </div>
       </div>
 
