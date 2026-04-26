@@ -1,3 +1,4 @@
+import os
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -14,6 +15,8 @@ logger = logging.getLogger("forge_agent")
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://your-coding-agent.pages.dev",
+    os.getenv("FRONTEND_URL", ""),
 ]
 
 
