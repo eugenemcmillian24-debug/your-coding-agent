@@ -97,6 +97,10 @@ The following environment variables must be set in Railway:
 - `CLOUDFLARE_API_TOKEN` - Cloudflare API token
 - `CLOUDFLARE_ACCOUNT_ID` - Cloudflare account ID
 - `CLOUDFLARE_WEBHOOK_SECRET` - Cloudflare webhook secret
+- `STRIPE_SECRET_KEY` - Stripe API secret key
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
+- `ADMIN_EMAILS` - Comma-separated admin emails
+- `FRONTEND_URL` - Frontend application URL
 
 **Optional:**
 - `OPENCODE_API_KEY` - AI provider API key
@@ -124,8 +128,41 @@ The following environment variables must be set in Railway:
 After deployment, verify:
 - Backend health check: `https://your-backend.railway.app/health`
 - Worker logs show successful connection to Redis
-- Database tables are created on startup
+- Database tables are created on startup (including `subscriptions` table)
 - API endpoints are accessible
+- Stripe endpoints are available:
+  - GET `/api/stripe/plans` - List available subscription plans
+  - GET `/api/stripe/subscription/{email}` - Get subscription status for user
+
+## Stripe Integration
+
+The application includes Stripe integration for subscription management:
+
+### Features
+- **Subscription Tiers**: Basic, Starter, Pro, Premium with different build limits and model access
+- **Admin Free Access**: Emails listed in `ADMIN_EMAILS` get unlimited premium access automatically
+- **Webhook Support**: Handles Stripe webhook events for subscription lifecycle management
+- **Billing Portal**: Users can manage their subscriptions through Stripe's billing portal
+
+### Required Tables
+The `subscriptions` table is automatically created on startup with the following schema:
+- `customer_id` - Stripe customer ID
+- `customer_email` - Customer email (unique)
+- `subscription_id` - Stripe subscription ID (unique)
+- `tier` - Subscription tier (basic, starter, pro, premium)
+- `status` - Subscription status (active, canceled, past_due, trialing)
+- `created_at`, `updated_at` - Timestamps
+
+### Admin Configuration
+Set the `ADMIN_EMAILS` environment variable to grant free unlimited access to specific users:
+```bash
+ADMIN_EMAILS=admin@example.com,owner@example.com,dev-team@example.com
+```
+
+Admin users bypass Stripe subscription checks and receive:
+- Unlimited builds (`builds_per_month: -1`)
+- Premium tier access
+- All available models (free, go, zen)
 
 ## Troubleshooting
 
@@ -139,3 +176,6 @@ Common issues:
 - Missing environment variables → Add in Railway dashboard
 - Database connection failed → Check DATABASE_URL includes sslmode=require
 - Worker not processing jobs → Verify REDIS_URL and Redis service is running
+- Stripe webhook verification fails → Check STRIPE_WEBHOOK_SECRET matches Stripe dashboard
+- Admin access not working → Verify ADMIN_EMAILS is comma-separated and lowercase comparison works
+- Subscription endpoints fail → Check that `subscriptions` table was created (查看日志 for "Database tables initialized")

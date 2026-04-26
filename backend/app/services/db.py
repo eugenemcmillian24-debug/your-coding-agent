@@ -124,6 +124,24 @@ def init_db():
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_webhook_events_source ON webhook_events(source)
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS subscriptions (
+                    id SERIAL PRIMARY KEY,
+                    customer_id TEXT,
+                    customer_email TEXT NOT NULL UNIQUE,
+                    subscription_id TEXT NOT NULL UNIQUE,
+                    tier TEXT NOT NULL DEFAULT 'basic',
+                    status TEXT NOT NULL DEFAULT 'active',
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_subscriptions_customer_email ON subscriptions(customer_email)
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_subscriptions_subscription_id ON subscriptions(subscription_id)
+            """)
             logger.info("Database tables initialized")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
