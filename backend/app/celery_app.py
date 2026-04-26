@@ -1,4 +1,7 @@
 import os
+import sys
+print(">>> CELERY_APP MODULE LOADING v3 <<<", file=sys.stderr, flush=True)
+
 from celery import Celery
 
 celery_app = Celery(
@@ -8,9 +11,9 @@ celery_app = Celery(
 )
 celery_app.conf.task_routes = {'app.tasks.*': {'queue': 'forge'}}
 
-
 @celery_app.task(bind=True, name='app.tasks.run_job', autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 5})
 def run_job(self, job_id: str):
-    """Pipeline entry point — registered directly on the Celery app to avoid import issues."""
     from app.services.worker_pipeline import run_pipeline
     return run_pipeline(job_id)
+
+print(f">>> REGISTERED TASKS: {list(celery_app.tasks.keys())} <<<", file=sys.stderr, flush=True)
