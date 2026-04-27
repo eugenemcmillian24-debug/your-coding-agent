@@ -20,6 +20,63 @@ type Subscription = {
   is_admin?: boolean;
 }
 
+/* ── SVG Icons ── */
+const Icons = {
+  code: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
+    </svg>
+  ),
+  fileText: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+    </svg>
+  ),
+  download: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  ),
+  logOut: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  ),
+  check: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  ),
+  zap: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  ),
+  settings: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  ),
+  creditCard: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" />
+    </svg>
+  ),
+  externalLink: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  ),
+}
+
+function StatusDot({ status }: { status: string }) {
+  const cls = status === 'complete' ? 'status-dot-complete'
+    : status === 'failed' ? 'status-dot-failed'
+    : status === 'running' || status === 'building' ? 'status-dot-running'
+    : 'status-dot-pending'
+  return <span className={`status-dot ${cls}`} />
+}
+
 export default function Home() {
   const [view, setView] = useState<'pricing' | 'builder'>('pricing')
   const [plans, setPlans] = useState<Plan[]>([])
@@ -44,7 +101,7 @@ export default function Home() {
   const [models, setModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState('')
   const [jobs, setJobs] = useState<Job[]>([])
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<Record<string, unknown> | null>(null)
 
   // Invoice state
   const [invoiceInput, setInvoiceInput] = useState('')
@@ -64,7 +121,6 @@ export default function Home() {
       setView('builder')
     }
 
-    // Check for existing Supabase session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
@@ -73,7 +129,6 @@ export default function Home() {
       setSessionLoading(false)
     })
 
-    // Listen for auth state changes
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (session?.user) {
@@ -164,7 +219,6 @@ export default function Home() {
         if (data.user.identities?.length === 0) {
           setAuthError('An account with this email already exists. Please sign in instead.')
         } else if (data.session) {
-          // Auto-confirmed (e.g. when email confirmation is disabled)
           setAuthEmail('')
           setAuthPassword('')
           setAuthConfirmPassword('')
@@ -289,340 +343,323 @@ export default function Home() {
     basic: '#64748b', starter: '#38bdf8', pro: '#a78bfa', premium: '#f59e0b'
   }
 
-  // Show loading while checking session
+  /* ── Loading Screen ── */
   if (sessionLoading) {
     return (
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 24, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 42, marginBottom: 8 }}>Forge Agent</h1>
-        <p style={{ color: '#94a3b8' }}>Loading...</p>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, color: 'var(--accent)' }}>
+            {Icons.zap}
+            <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.5px' }}>Forge Agent</span>
+          </div>
+        </div>
+        <div className="spinner" style={{ margin: '0 auto' }} />
       </main>
     )
   }
 
-  // ── Auth View (not signed in) ──
+  /* ────────────────────────────────────────
+     AUTH VIEW (not signed in)
+     ──────────────────────────────────────── */
   if (!user) {
     return (
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h1 style={{ fontSize: 42, marginBottom: 8 }}>Forge Agent</h1>
-          <p style={{ color: '#94a3b8', fontSize: 18 }}>AI-powered code generation & deployment pipeline</p>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px' }}>
+        {/* Hero */}
+        <div className="animate-fade-in" style={{ textAlign: 'center', paddingTop: 48, marginBottom: 48 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 16, color: 'var(--accent)' }}>
+            {Icons.zap}
+            <span style={{ fontSize: 14, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+              AI-Powered Platform
+            </span>
+          </div>
+          <h1 style={{
+            fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 800, margin: '0 0 12px',
+            letterSpacing: '-1px', lineHeight: 1.1,
+            background: 'linear-gradient(135deg, #f0f4f8, #38bdf8, #a78bfa)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            backgroundSize: '200% 200%', animation: 'gradientShift 6s ease infinite',
+          }}>
+            Build, Deploy &<br />Invoice with AI
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 18, maxWidth: 480, margin: '0 auto', lineHeight: 1.6 }}>
+            Code generation, Cloudflare deployment pipeline, and smart invoice creation — all in one platform.
+          </p>
         </div>
 
-        {/* Auth form */}
-        <div style={{ ...card, maxWidth: 420, margin: '0 auto 40px' }}>
-          {/* Tab toggle */}
-          <div style={{ display: 'flex', borderRadius: 12, overflow: 'hidden', border: '1px solid #334155' }}>
+        {/* Auth Form */}
+        <div className="glass animate-fade-in-up" style={{ maxWidth: 440, margin: '0 auto 56px', padding: 28 }}>
+          <div className="tab-bar" style={{ marginBottom: 20 }}>
             <button
               onClick={() => { setAuthMode('signin'); setAuthError(''); setAuthSuccess('') }}
-              style={{
-                ...tabBtn,
-                background: authMode === 'signin' ? '#1e293b' : 'transparent',
-                color: authMode === 'signin' ? '#e2e8f0' : '#64748b',
-              }}
+              className={`tab-btn ${authMode === 'signin' ? 'active' : ''}`}
             >
               Sign In
             </button>
             <button
               onClick={() => { setAuthMode('signup'); setAuthError(''); setAuthSuccess('') }}
-              style={{
-                ...tabBtn,
-                background: authMode === 'signup' ? '#1e293b' : 'transparent',
-                color: authMode === 'signup' ? '#e2e8f0' : '#64748b',
-              }}
+              className={`tab-btn ${authMode === 'signup' ? 'active' : ''}`}
             >
               Sign Up
             </button>
           </div>
 
-          <input
-            value={authEmail}
-            onChange={e => setAuthEmail(e.target.value)}
-            style={field}
-            placeholder="your@email.com"
-            type="email"
-            onKeyDown={e => e.key === 'Enter' && (authMode === 'signin' ? handleSignIn() : handleSignUp())}
-          />
-
-          <input
-            value={authPassword}
-            onChange={e => setAuthPassword(e.target.value)}
-            style={field}
-            placeholder="Password"
-            type="password"
-            onKeyDown={e => e.key === 'Enter' && (authMode === 'signin' ? handleSignIn() : handleSignUp())}
-          />
-
-          {authMode === 'signup' && (
+          <div style={{ display: 'grid', gap: 12 }}>
             <input
-              value={authConfirmPassword}
-              onChange={e => setAuthConfirmPassword(e.target.value)}
-              style={field}
-              placeholder="Confirm password"
-              type="password"
-              onKeyDown={e => e.key === 'Enter' && handleSignUp()}
+              value={authEmail} onChange={e => setAuthEmail(e.target.value)}
+              className="input" placeholder="your@email.com" type="email"
+              onKeyDown={e => e.key === 'Enter' && (authMode === 'signin' ? handleSignIn() : handleSignUp())}
             />
-          )}
+            <input
+              value={authPassword} onChange={e => setAuthPassword(e.target.value)}
+              className="input" placeholder="Password" type="password"
+              onKeyDown={e => e.key === 'Enter' && (authMode === 'signin' ? handleSignIn() : handleSignUp())}
+            />
+            {authMode === 'signup' && (
+              <input
+                value={authConfirmPassword} onChange={e => setAuthConfirmPassword(e.target.value)}
+                className="input" placeholder="Confirm password" type="password"
+                onKeyDown={e => e.key === 'Enter' && handleSignUp()}
+              />
+            )}
 
-          {authError && (
-            <div style={{ color: '#ef4444', fontSize: 14, padding: '8px 12px', background: '#1c1917', borderRadius: 8 }}>
-              {authError}
-            </div>
-          )}
-
-          {authSuccess && (
-            <div style={{ color: '#22c55e', fontSize: 14, padding: '8px 12px', background: '#052e16', borderRadius: 8 }}>
-              {authSuccess}
-            </div>
-          )}
-
-          <button
-            onClick={authMode === 'signin' ? handleSignIn : handleSignUp}
-            disabled={authLoading}
-            style={{ ...btn, width: '100%' }}
-          >
-            {authLoading ? 'Please wait...' : authMode === 'signin' ? 'Sign In' : 'Create Account'}
-          </button>
-        </div>
-
-        {/* Plan cards (visible even before sign in for marketing) */}
-        <h2 style={{ textAlign: 'center', marginBottom: 24, color: '#94a3b8' }}>Choose a Plan</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20 }}>
-          {plans.map(plan => (
-            <div key={plan.tier} style={{
-              ...card, border: `2px solid ${tierColors[plan.tier] || '#334155'}`,
-              display: 'flex', flexDirection: 'column', position: 'relative',
-            }}>
-              {plan.tier === 'pro' && (
-                <div style={{
-                  position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                  background: '#a78bfa', color: '#0f172a', padding: '4px 16px', borderRadius: 20,
-                  fontSize: 12, fontWeight: 700, textTransform: 'uppercase',
-                }}>Most Popular</div>
-              )}
-              <h2 style={{ margin: '8px 0 4px', color: tierColors[plan.tier] }}>{plan.name}</h2>
-              <div style={{ fontSize: 36, fontWeight: 800, margin: '8px 0' }}>
-                ${(plan.amount / 100).toFixed(2)}
-                <span style={{ fontSize: 16, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
-              </div>
-              <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 16 }}>
-                {plan.builds_per_month === -1 ? 'Unlimited builds' : `${plan.builds_per_month} builds/month`}
-              </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', flex: 1 }}>
-                {plan.features.map((f, i) => (
-                  <li key={i} style={{ padding: '6px 0', fontSize: 14, color: '#cbd5e1' }}>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button onClick={() => startCheckout(plan.tier)} style={{
-                ...btn, background: tierColors[plan.tier], color: '#0f172a', width: '100%',
+            {authError && (
+              <div style={{
+                color: 'var(--danger)', fontSize: 13, padding: '10px 14px',
+                background: 'var(--danger-glow)', borderRadius: 'var(--radius-sm)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
               }}>
-                Get {plan.name}
-              </button>
-            </div>
-          ))}
-        </div>
-      </main>
-    )
-  }
+                {authError}
+              </div>
+            )}
+            {authSuccess && (
+              <div style={{
+                color: 'var(--success)', fontSize: 13, padding: '10px 14px',
+                background: 'var(--success-glow)', borderRadius: 'var(--radius-sm)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+              }}>
+                {authSuccess}
+              </div>
+            )}
 
-  // ── Pricing View (signed in but no subscription) ──
-  if (!subscription?.subscribed) {
-    return (
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-          <div>
-            <h1 style={{ fontSize: 42, marginBottom: 8 }}>Forge Agent</h1>
-            <p style={{ color: '#94a3b8', fontSize: 18 }}>AI-powered code generation & deployment pipeline</p>
-          </div>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span style={{ color: '#94a3b8', fontSize: 13 }}>{user.email}</span>
-            <button onClick={handleSignOut} style={{ ...btn, background: '#334155', fontSize: 13, padding: '6px 12px' }}>
-              Sign Out
+            <button
+              onClick={authMode === 'signin' ? handleSignIn : handleSignUp}
+              disabled={authLoading}
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '14px 20px', fontSize: 15 }}
+            >
+              {authLoading && <span className="spinner" style={{ width: 16, height: 16 }} />}
+              {authLoading ? 'Please wait...' : authMode === 'signin' ? 'Sign In' : 'Create Account'}
             </button>
           </div>
         </div>
 
+        {/* Pricing Cards */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.5px' }}>Choose a Plan</h2>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 15 }}>Start building with AI today</p>
+        </div>
+        <PricingGrid plans={plans} tierColors={tierColors} onCheckout={startCheckout} />
+      </main>
+    )
+  }
+
+  /* ────────────────────────────────────────
+     PRICING VIEW (signed in, no subscription)
+     ──────────────────────────────────────── */
+  if (!subscription?.subscribed) {
+    return (
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
+        <NavBar user={user} subscription={null} onSignOut={handleSignOut} />
+
         {loading ? (
-          <p style={{ textAlign: 'center', color: '#94a3b8' }}>Checking subscription...</p>
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <div className="spinner" style={{ margin: '0 auto 16px' }} />
+            <p style={{ color: 'var(--text-secondary)' }}>Checking subscription...</p>
+          </div>
         ) : (
-          <>
-            <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: 24 }}>
-              Choose a plan to get started
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20 }}>
-              {plans.map(plan => (
-                <div key={plan.tier} style={{
-                  ...card, border: `2px solid ${tierColors[plan.tier] || '#334155'}`,
-                  display: 'flex', flexDirection: 'column', position: 'relative',
-                }}>
-                  {plan.tier === 'pro' && (
-                    <div style={{
-                      position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                      background: '#a78bfa', color: '#0f172a', padding: '4px 16px', borderRadius: 20,
-                      fontSize: 12, fontWeight: 700, textTransform: 'uppercase',
-                    }}>Most Popular</div>
-                  )}
-                  <h2 style={{ margin: '8px 0 4px', color: tierColors[plan.tier] }}>{plan.name}</h2>
-                  <div style={{ fontSize: 36, fontWeight: 800, margin: '8px 0' }}>
-                    ${(plan.amount / 100).toFixed(2)}
-                    <span style={{ fontSize: 16, fontWeight: 400, color: '#94a3b8' }}>/mo</span>
-                  </div>
-                  <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 16 }}>
-                    {plan.builds_per_month === -1 ? 'Unlimited builds' : `${plan.builds_per_month} builds/month`}
-                  </div>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', flex: 1 }}>
-                    {plan.features.map((f, i) => (
-                      <li key={i} style={{ padding: '6px 0', fontSize: 14, color: '#cbd5e1' }}>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <button onClick={() => startCheckout(plan.tier)} style={{
-                    ...btn, background: tierColors[plan.tier], color: '#0f172a', width: '100%',
-                  }}>
-                    Get {plan.name}
-                  </button>
-                </div>
-              ))}
+          <div className="animate-fade-in">
+            <div style={{ textAlign: 'center', margin: '40px 0 28px' }}>
+              <h2 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 6px', letterSpacing: '-0.5px' }}>Choose a Plan</h2>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Select a plan to unlock the builder</p>
             </div>
-          </>
+            <PricingGrid plans={plans} tierColors={tierColors} onCheckout={startCheckout} />
+          </div>
         )}
       </main>
     )
   }
 
-  // ── Builder View (subscribed or admin) ──
+  /* ────────────────────────────────────────
+     BUILDER VIEW (subscribed or admin)
+     ──────────────────────────────────────── */
   return (
     <main style={{ maxWidth: 1100, margin: '0 auto', padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div>
-          <h1 style={{ margin: 0 }}>Forge Agent</h1>
-          <p style={{ margin: 0, color: '#94a3b8' }}>GitHub + Cloudflare Pages deployment pipeline</p>
-        </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {subscription?.is_admin ? (
-            <span style={{
-              background: '#ef4444', color: '#fff',
-              padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700,
-              textTransform: 'uppercase',
-            }}>Admin</span>
-          ) : (
-            <span style={{
-              background: tierColors[subscription?.tier || 'basic'], color: '#0f172a',
-              padding: '4px 12px', borderRadius: 20, fontSize: 13, fontWeight: 700,
-              textTransform: 'uppercase',
-            }}>{subscription?.tier}</span>
-          )}
-          <span style={{ color: '#94a3b8', fontSize: 13 }}>{user.email}</span>
-          {!subscription?.is_admin && (
-            <button onClick={openPortal} style={{ ...btn, background: '#334155', fontSize: 13, padding: '6px 12px' }}>
-              Manage Plan
-            </button>
-          )}
-          <button onClick={handleSignOut} style={{ ...btn, background: '#475569', fontSize: 13, padding: '6px 12px' }}>
-            Sign Out
-          </button>
-        </div>
-      </div>
+      <NavBar
+        user={user}
+        subscription={subscription}
+        tierColors={tierColors}
+        onSignOut={handleSignOut}
+        onManagePlan={openPortal}
+      />
 
-      {/* Tab navigation */}
-      <div style={{ display: 'flex', borderRadius: 12, overflow: 'hidden', border: '1px solid #334155', marginBottom: 20 }}>
+      {/* Tab Navigation */}
+      <div className="tab-bar" style={{ marginBottom: 24 }}>
         <button
           onClick={() => setBuilderTab('builder')}
-          style={{
-            ...tabBtn,
-            background: builderTab === 'builder' ? '#1e293b' : 'transparent',
-            color: builderTab === 'builder' ? '#e2e8f0' : '#64748b',
-          }}
+          className={`tab-btn ${builderTab === 'builder' ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
         >
-          Code Builder
+          {Icons.code} Code Builder
         </button>
         <button
           onClick={() => { setBuilderTab('invoice'); loadInvoiceCredits() }}
-          style={{
-            ...tabBtn,
-            background: builderTab === 'invoice' ? '#1e293b' : 'transparent',
-            color: builderTab === 'invoice' ? '#e2e8f0' : '#64748b',
-          }}
+          className={`tab-btn ${builderTab === 'invoice' ? 'active' : ''}`}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
         >
-          Invoice Generator
+          {Icons.fileText} Invoice Generator
         </button>
       </div>
 
       {builderTab === 'builder' ? (
-        <>
-          <div style={card}>
-            <input value={appName} onChange={e => setAppName(e.target.value)} style={field} placeholder="App name" />
-            <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={6} style={field}
-              placeholder="Describe what to build..." />
-
-            {/* Model selector */}
-            <div>
-              <label style={{ display: 'block', marginBottom: 6, color: '#94a3b8', fontSize: 13 }}>AI Model</label>
-              <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)} style={field}>
-                {['Free Models', 'Go Plan'].map(group => {
-                  const groupModels = models.filter(m => m.group === group)
-                  if (groupModels.length === 0) return null
-                  return (
-                    <optgroup key={group} label={`${group === 'Free Models' ? 'Free' : 'Go'} ${group}`}>
-                      {groupModels.map(m => <option key={m.id} value={m.id}>{m.name} ({m.id})</option>)}
-                    </optgroup>
-                  )
-                })}
-              </select>
+        <div className="animate-fade-in">
+          {/* Build Form */}
+          <div className="glass" style={{ padding: 24, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gap: 14 }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+                  App Name
+                </label>
+                <input value={appName} onChange={e => setAppName(e.target.value)} className="input" placeholder="my-awesome-app" />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+                  Prompt
+                </label>
+                <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={5} className="input"
+                  placeholder="Describe what you want to build..." />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+                  AI Model
+                </label>
+                <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)} className="input">
+                  {['Free Models', 'Go Plan'].map(group => {
+                    const groupModels = models.filter(m => m.group === group)
+                    if (groupModels.length === 0) return null
+                    return (
+                      <optgroup key={group} label={group}>
+                        {groupModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                      </optgroup>
+                    )
+                  })}
+                </select>
+              </div>
+              <button onClick={submit} className="btn btn-primary" style={{ width: '100%' }}>
+                {Icons.zap} Queue Build
+              </button>
             </div>
-
-            <button onClick={submit} style={btn}>Queue job</button>
           </div>
 
-          {result && <pre style={pre}>{JSON.stringify(result, null, 2)}</pre>}
+          {result && (
+            <pre style={{
+              marginBottom: 20, padding: 16, borderRadius: 'var(--radius-md)',
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              overflowX: 'auto', fontSize: 13, color: 'var(--text-secondary)',
+            }}>
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          )}
 
-          <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+          {/* Job List */}
+          <div style={{ display: 'grid', gap: 10 }}>
             {jobs.map(j => (
-              <div key={j.id} style={card}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <strong>{j.app_name}</strong>
-                  {j.model && <span style={{ fontSize: 12, color: '#64748b', background: '#1e293b', padding: '2px 8px', borderRadius: 8 }}>{j.model}</span>}
+              <div key={j.id} className="glass" style={{ padding: 18 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <StatusDot status={j.status} />
+                    <strong style={{ fontSize: 15 }}>{j.app_name}</strong>
+                  </div>
+                  {j.model && (
+                    <span className="badge" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+                      {j.model}
+                    </span>
+                  )}
                 </div>
-                <div>Status: {j.status}</div>
-                <div>PR: {j.pr_url ? <a href={j.pr_url} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{j.pr_url}</a> : '\u2014'}</div>
-                <div>Deploy: {j.deployment_url ? <a href={`https://${j.deployment_url}`} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{j.deployment_url}</a> : '\u2014'}</div>
-                <div>Deploy state: {j.deployment_state || '\u2014'}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 8, fontSize: 13 }}>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)' }}>Status: </span>
+                    <span style={{
+                      color: j.status === 'complete' ? 'var(--success)' : j.status === 'failed' ? 'var(--danger)' : 'var(--accent)',
+                      fontWeight: 500,
+                    }}>
+                      {j.status}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)' }}>PR: </span>
+                    {j.pr_url ? (
+                      <a href={j.pr_url} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                        View PR {Icons.externalLink}
+                      </a>
+                    ) : <span style={{ color: 'var(--text-muted)' }}>&mdash;</span>}
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)' }}>Deploy: </span>
+                    {j.deployment_url ? (
+                      <a href={`https://${j.deployment_url}`} target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>
+                        {j.deployment_url} {Icons.externalLink}
+                      </a>
+                    ) : <span style={{ color: 'var(--text-muted)' }}>&mdash;</span>}
+                  </div>
+                </div>
               </div>
             ))}
+            {jobs.length === 0 && (
+              <div className="glass" style={{ padding: 40, textAlign: 'center' }}>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 8 }}>{Icons.code}</div>
+                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>No builds yet. Create your first one above!</p>
+              </div>
+            )}
           </div>
-        </>
+        </div>
       ) : (
-        <>
+        <div className="animate-fade-in">
           {/* Invoice Generator */}
-          <div style={card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ margin: 0, fontSize: 20, color: '#e2e8f0' }}>AI Invoice Generator</h2>
+          <div className="glass" style={{ padding: 24, marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 700 }}>AI Invoice Generator</h2>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: 13 }}>
+                  Paste client &amp; project details. AI structures the data and generates a professional PDF.
+                </p>
+              </div>
               {invoiceCredits && (
-                <span style={{ fontSize: 13, color: '#94a3b8' }}>
-                  Credits: <strong style={{ color: '#38bdf8' }}>
-                    {invoiceCredits.credits_remaining === 'unlimited' ? 'Unlimited' : invoiceCredits.credits_remaining}
-                  </strong>
-                  {invoiceCredits.credits_used > 0 && ` (${invoiceCredits.credits_used} used this month)`}
-                </span>
+                <div className="badge" style={{
+                  background: 'var(--accent-glow)', color: 'var(--accent)',
+                  border: '1px solid rgba(56, 189, 248, 0.2)',
+                  fontSize: 12, padding: '6px 14px', whiteSpace: 'nowrap',
+                }}>
+                  {Icons.creditCard}
+                  {invoiceCredits.credits_remaining === 'unlimited' ? 'Unlimited' : `${invoiceCredits.credits_remaining} credits`}
+                </div>
               )}
             </div>
-
-            <p style={{ margin: 0, color: '#94a3b8', fontSize: 14 }}>
-              Paste your client and project details below. AI will structure the data and generate a professional PDF invoice.
-            </p>
 
             <textarea
               value={invoiceInput}
               onChange={e => setInvoiceInput(e.target.value)}
               rows={10}
-              style={field}
+              className="input"
               placeholder={`Example:\nBill from: Acme Web Studio, 123 Main St, Springfield IL\nBill to: Client Corp, 456 Oak Ave, Chicago IL\n\nProject: E-commerce website redesign\n- UI/UX Design: 20 hours @ $150/hr\n- Frontend Development: 40 hours @ $175/hr\n- Backend API: 30 hours @ $175/hr\n- QA Testing: 10 hours @ $100/hr\n\nDue: Net 30\nNotes: Thank you for your business!`}
+              style={{ marginBottom: 14 }}
             />
 
             {invoiceError && (
-              <div style={{ color: '#ef4444', fontSize: 14, padding: '8px 12px', background: '#1c1917', borderRadius: 8 }}>
+              <div style={{
+                color: 'var(--danger)', fontSize: 13, padding: '10px 14px', marginBottom: 14,
+                background: 'var(--danger-glow)', borderRadius: 'var(--radius-sm)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+              }}>
                 {invoiceError}
               </div>
             )}
@@ -630,71 +667,225 @@ export default function Home() {
             <button
               onClick={generateInvoice}
               disabled={invoiceLoading}
-              style={{ ...btn, background: '#22c55e', color: '#fff' }}
+              className="btn btn-success"
+              style={{ width: '100%' }}
             >
-              {invoiceLoading ? 'Generating invoice...' : 'Generate Invoice (1 credit)'}
+              {invoiceLoading ? (
+                <><span className="spinner" style={{ width: 16, height: 16 }} /> Generating...</>
+              ) : (
+                <>{Icons.zap} Generate Invoice (1 credit)</>
+              )}
             </button>
           </div>
 
+          {/* Invoice Result */}
           {invoiceResult && (
-            <div style={{ ...card, marginTop: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0, color: '#e2e8f0' }}>Invoice Generated</h3>
-                <button onClick={downloadPdf} style={{ ...btn, background: '#38bdf8' }}>
-                  Download PDF
+            <div className="glass animate-fade-in-up" style={{ padding: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Invoice Generated</h3>
+                <button onClick={downloadPdf} className="btn btn-primary" style={{ padding: '10px 18px' }}>
+                  {Icons.download} Download PDF
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
-                <div>
-                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>Invoice #</div>
-                  <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{(invoiceResult.invoice_data as Record<string, string>).invoice_number}</div>
-                </div>
-                <div>
-                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>Due Date</div>
-                  <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{(invoiceResult.invoice_data as Record<string, string>).due_date}</div>
-                </div>
-                <div>
-                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>From</div>
-                  <div style={{ color: '#e2e8f0' }}>{(invoiceResult.invoice_data as Record<string, string>).from_name}</div>
-                </div>
-                <div>
-                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>To</div>
-                  <div style={{ color: '#e2e8f0' }}>{(invoiceResult.invoice_data as Record<string, string>).to_name}</div>
-                </div>
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: 16,
+                background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', marginBottom: 16,
+              }}>
+                <InfoCell label="Invoice #" value={(invoiceResult.invoice_data as Record<string, string>).invoice_number} />
+                <InfoCell label="Due Date" value={(invoiceResult.invoice_data as Record<string, string>).due_date} />
+                <InfoCell label="From" value={(invoiceResult.invoice_data as Record<string, string>).from_name} />
+                <InfoCell label="To" value={(invoiceResult.invoice_data as Record<string, string>).to_name} />
               </div>
 
               {Array.isArray((invoiceResult.invoice_data as Record<string, unknown>).line_items) && (
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>Line Items</div>
-                  <div style={{ display: 'grid', gap: 4 }}>
-                    {((invoiceResult.invoice_data as Record<string, unknown>).line_items as Array<{description: string; quantity: number; unit_price: number}>).map((item, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#cbd5e1', padding: '4px 0', borderBottom: '1px solid #1e293b' }}>
-                        <span>{item.description}</span>
-                        <span>{item.quantity} x ${item.unit_price.toFixed(2)} = ${(item.quantity * item.unit_price).toFixed(2)}</span>
-                      </div>
-                    ))}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, color: '#38bdf8', padding: '8px 0' }}>
-                      <span>Total</span>
-                      <span>${((invoiceResult.invoice_data as Record<string, unknown>).line_items as Array<{quantity: number; unit_price: number}>).reduce((s, it) => s + it.quantity * it.unit_price, 0).toFixed(2)}</span>
+                <div style={{
+                  background: 'var(--bg-base)', borderRadius: 'var(--radius-md)', padding: 16,
+                }}>
+                  <div style={{
+                    display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8, marginBottom: 8,
+                    fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px',
+                  }}>
+                    <span>Description</span><span>Qty x Price</span><span style={{ textAlign: 'right' }}>Amount</span>
+                  </div>
+                  {((invoiceResult.invoice_data as Record<string, unknown>).line_items as Array<{description: string; quantity: number; unit_price: number}>).map((item, i) => (
+                    <div key={i} style={{
+                      display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 8,
+                      padding: '10px 0', borderTop: '1px solid var(--border)', fontSize: 14,
+                    }}>
+                      <span style={{ color: 'var(--text-primary)' }}>{item.description}</span>
+                      <span style={{ color: 'var(--text-secondary)' }}>{item.quantity} x ${item.unit_price.toFixed(2)}</span>
+                      <span style={{ textAlign: 'right', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        ${(item.quantity * item.unit_price).toFixed(2)}
+                      </span>
                     </div>
+                  ))}
+                  <div style={{
+                    display: 'flex', justifyContent: 'space-between', padding: '14px 0 4px',
+                    borderTop: '2px solid var(--border-bright)', marginTop: 4,
+                    fontSize: 18, fontWeight: 700, color: 'var(--accent)',
+                  }}>
+                    <span>Total</span>
+                    <span>
+                      ${((invoiceResult.invoice_data as Record<string, unknown>).line_items as Array<{quantity: number; unit_price: number}>)
+                        .reduce((s, it) => s + it.quantity * it.unit_price, 0).toFixed(2)}
+                    </span>
                   </div>
                 </div>
               )}
 
-              <div style={{ fontSize: 12, color: '#64748b', marginTop: 8 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 12, textAlign: 'right' }}>
                 Credits remaining: {invoiceResult.credits_remaining === 'unlimited' ? 'Unlimited' : invoiceResult.credits_remaining}
               </div>
             </div>
           )}
-        </>
+
+          {!invoiceResult && (
+            <div className="glass" style={{ padding: 40, textAlign: 'center' }}>
+              <div style={{ color: 'var(--text-muted)', marginBottom: 8 }}>{Icons.fileText}</div>
+              <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+                Your generated invoice will appear here
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </main>
   )
 }
 
-const card: React.CSSProperties = { display: 'grid', gap: 12, background: '#0f172a', padding: 20, borderRadius: 16 }
-const field: React.CSSProperties = { width: '100%', padding: 12, borderRadius: 12, border: '1px solid #334155', background: '#020617', color: '#e2e8f0', fontSize: 14 }
-const btn: React.CSSProperties = { padding: '12px 18px', borderRadius: 12, border: 'none', background: '#38bdf8', color: '#04121a', fontWeight: 700, cursor: 'pointer', fontSize: 15 }
-const tabBtn: React.CSSProperties = { flex: 1, padding: '10px 16px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14 }
-const pre: React.CSSProperties = { marginTop: 20, padding: 16, borderRadius: 16, background: '#020617', overflowX: 'auto' }
+/* ── Sub-components ── */
+
+function NavBar({
+  user, subscription, tierColors, onSignOut, onManagePlan,
+}: {
+  user: User
+  subscription: Subscription | null
+  tierColors?: Record<string, string>
+  onSignOut: () => void
+  onManagePlan?: () => void
+}) {
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ color: 'var(--accent)', display: 'flex' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+        </span>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '-0.3px' }}>Forge Agent</h1>
+          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 12 }}>AI Code &amp; Invoice Platform</p>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        {subscription?.is_admin ? (
+          <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+            Admin
+          </span>
+        ) : subscription?.tier && tierColors ? (
+          <span className="badge" style={{
+            background: `color-mix(in srgb, ${tierColors[subscription.tier]} 15%, transparent)`,
+            color: tierColors[subscription.tier],
+            border: `1px solid color-mix(in srgb, ${tierColors[subscription.tier]} 25%, transparent)`,
+          }}>
+            {subscription.tier}
+          </span>
+        ) : null}
+        <span className="hide-mobile" style={{ color: 'var(--text-muted)', fontSize: 13 }}>{user.email}</span>
+        {onManagePlan && subscription && !subscription.is_admin && (
+          <button onClick={onManagePlan} className="btn btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }}>
+            {Icons.settings} <span className="hide-mobile">Manage</span>
+          </button>
+        )}
+        <button onClick={onSignOut} className="btn btn-ghost" style={{ padding: '7px 14px', fontSize: 13 }}>
+          {Icons.logOut} <span className="hide-mobile">Sign Out</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function PricingGrid({
+  plans, tierColors, onCheckout,
+}: {
+  plans: Plan[]
+  tierColors: Record<string, string>
+  onCheckout: (tier: string) => void
+}) {
+  return (
+    <div className="pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20 }}>
+      {plans.map((plan, idx) => (
+        <div
+          key={plan.tier}
+          className={`pricing-card tier-${plan.tier} animate-fade-in-up`}
+          style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
+        >
+          {plan.tier === 'pro' && (
+            <div style={{
+              position: 'absolute', top: 12, right: 12,
+              background: 'var(--pro)', color: '#0f172a', padding: '3px 10px',
+              borderRadius: 'var(--radius-full)', fontSize: 10, fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.5px',
+            }}>
+              Popular
+            </div>
+          )}
+          <h3 style={{ margin: '4px 0 8px', color: 'var(--tier-color)', fontSize: 18, fontWeight: 700 }}>
+            {plan.name}
+          </h3>
+          <div style={{ fontSize: 40, fontWeight: 800, margin: '4px 0 4px', letterSpacing: '-1px' }}>
+            ${(plan.amount / 100).toFixed(2)}
+            <span style={{ fontSize: 15, fontWeight: 400, color: 'var(--text-muted)' }}>/mo</span>
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 20 }}>
+            {plan.builds_per_month === -1 ? 'Unlimited builds' : `${plan.builds_per_month} builds/month`}
+          </div>
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', flex: 1 }}>
+            {plan.features.map((f, i) => (
+              <li key={i} style={{
+                display: 'flex', alignItems: 'flex-start', gap: 8, padding: '5px 0',
+                fontSize: 13, color: 'var(--text-secondary)',
+              }}>
+                <span style={{ color: 'var(--tier-color)', flexShrink: 0, marginTop: 1 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+                {f}
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={() => onCheckout(plan.tier)}
+            className="btn"
+            style={{
+              width: '100%',
+              background: `linear-gradient(135deg, ${tierColors[plan.tier]}, color-mix(in srgb, ${tierColors[plan.tier]} 70%, #fff))`,
+              color: '#0f172a', fontWeight: 700,
+              boxShadow: `0 2px 12px color-mix(in srgb, ${tierColors[plan.tier]} 30%, transparent)`,
+            }}
+          >
+            Get {plan.name}
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function InfoCell({ label, value }: { label: string; value: string | undefined }) {
+  return (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>
+        {label}
+      </div>
+      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>
+        {value || '\u2014'}
+      </div>
+    </div>
+  )
+}
