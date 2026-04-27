@@ -38,12 +38,22 @@ export default function Home() {
   const [sessionLoading, setSessionLoading] = useState(true)
 
   // Builder state
+  const [builderTab, setBuilderTab] = useState<'builder' | 'invoice'>('builder')
   const [appName, setAppName] = useState('')
   const [prompt, setPrompt] = useState('')
   const [models, setModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState('')
   const [jobs, setJobs] = useState<Job[]>([])
   const [result, setResult] = useState<any>(null)
+
+  // Invoice state
+  const [invoiceInput, setInvoiceInput] = useState('')
+  const [invoiceLoading, setInvoiceLoading] = useState(false)
+  const [invoiceResult, setInvoiceResult] = useState<{
+    invoice_id: string; invoice_data: Record<string, unknown>; pdf_base64: string; credits_remaining: number | string;
+  } | null>(null)
+  const [invoiceError, setInvoiceError] = useState('')
+  const [invoiceCredits, setInvoiceCredits] = useState<{ credits_remaining: number | string; credits_used: number } | null>(null)
 
   // Load plans and check existing session on mount
   useEffect(() => {
@@ -85,6 +95,7 @@ export default function Home() {
       setView('builder')
       loadModels()
       loadJobs()
+      loadInvoiceCredits()
       const t = setInterval(loadJobs, 4000)
       return () => clearInterval(t)
     }
@@ -220,6 +231,58 @@ export default function Home() {
       body: JSON.stringify({ app_name: appName, prompt, provider: 'opencode-go', model: selectedModel || undefined }),
     })
     setResult(await r.json()); loadJobs()
+  }
+
+  async function loadInvoiceCredits() {
+    if (!user?.email) return
+    try {
+      const r = await fetch(`${API}/api/invoice/credits/${encodeURIComponent(user.email)}`)
+      const data = await r.json()
+      setInvoiceCredits(data)
+    } catch { /* ignore */ }
+  }
+
+  async function generateInvoice() {
+    if (!user?.email) return
+    if (invoiceInput.length < 10) {
+      setInvoiceError('Please provide at least 10 characters of client/project info')
+      return
+    }
+    setInvoiceLoading(true)
+    setInvoiceError('')
+    setInvoiceResult(null)
+    try {
+      const r = await fetch(`${API}/api/invoice/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, input_text: invoiceInput }),
+      })
+      if (!r.ok) {
+        const err = await r.json()
+        setInvoiceError(err.detail || 'Generation failed')
+        return
+      }
+      const data = await r.json()
+      setInvoiceResult(data)
+      loadInvoiceCredits()
+    } catch (e: unknown) {
+      setInvoiceError(e instanceof Error ? e.message : 'Network error')
+    } finally {
+      setInvoiceLoading(false)
+    }
+  }
+
+  function downloadPdf() {
+    if (!invoiceResult?.pdf_base64) return
+    const bytes = Uint8Array.from(atob(invoiceResult.pdf_base64), c => c.charCodeAt(0))
+    const blob = new Blob([bytes], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    const invNum = (invoiceResult.invoice_data as Record<string, string>).invoice_number || invoiceResult.invoice_id.slice(0, 8)
+    a.href = url
+    a.download = `invoice-${invNum}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   const tierColors: Record<string, string> = {
@@ -463,46 +526,169 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={card}>
-        <input value={appName} onChange={e => setAppName(e.target.value)} style={field} placeholder="App name" />
-        <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={6} style={field}
-          placeholder="Describe what to build..." />
-
-        {/* Model selector */}
-        <div>
-          <label style={{ display: 'block', marginBottom: 6, color: '#94a3b8', fontSize: 13 }}>AI Model</label>
-          <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)} style={field}>
-            {['Free Models', 'Go Plan'].map(group => {
-              const groupModels = models.filter(m => m.group === group)
-              if (groupModels.length === 0) return null
-              return (
-                <optgroup key={group} label={`${group === 'Free Models' ? 'Free' : 'Go'} ${group}`}>
-                  {groupModels.map(m => <option key={m.id} value={m.id}>{m.name} ({m.id})</option>)}
-                </optgroup>
-              )
-            })}
-          </select>
-        </div>
-
-        <button onClick={submit} style={btn}>Queue job</button>
+      {/* Tab navigation */}
+      <div style={{ display: 'flex', borderRadius: 12, overflow: 'hidden', border: '1px solid #334155', marginBottom: 20 }}>
+        <button
+          onClick={() => setBuilderTab('builder')}
+          style={{
+            ...tabBtn,
+            background: builderTab === 'builder' ? '#1e293b' : 'transparent',
+            color: builderTab === 'builder' ? '#e2e8f0' : '#64748b',
+          }}
+        >
+          Code Builder
+        </button>
+        <button
+          onClick={() => { setBuilderTab('invoice'); loadInvoiceCredits() }}
+          style={{
+            ...tabBtn,
+            background: builderTab === 'invoice' ? '#1e293b' : 'transparent',
+            color: builderTab === 'invoice' ? '#e2e8f0' : '#64748b',
+          }}
+        >
+          Invoice Generator
+        </button>
       </div>
 
-      {result && <pre style={pre}>{JSON.stringify(result, null, 2)}</pre>}
+      {builderTab === 'builder' ? (
+        <>
+          <div style={card}>
+            <input value={appName} onChange={e => setAppName(e.target.value)} style={field} placeholder="App name" />
+            <textarea value={prompt} onChange={e => setPrompt(e.target.value)} rows={6} style={field}
+              placeholder="Describe what to build..." />
 
-      <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
-        {jobs.map(j => (
-          <div key={j.id} style={card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong>{j.app_name}</strong>
-              {j.model && <span style={{ fontSize: 12, color: '#64748b', background: '#1e293b', padding: '2px 8px', borderRadius: 8 }}>{j.model}</span>}
+            {/* Model selector */}
+            <div>
+              <label style={{ display: 'block', marginBottom: 6, color: '#94a3b8', fontSize: 13 }}>AI Model</label>
+              <select value={selectedModel} onChange={e => setSelectedModel(e.target.value)} style={field}>
+                {['Free Models', 'Go Plan'].map(group => {
+                  const groupModels = models.filter(m => m.group === group)
+                  if (groupModels.length === 0) return null
+                  return (
+                    <optgroup key={group} label={`${group === 'Free Models' ? 'Free' : 'Go'} ${group}`}>
+                      {groupModels.map(m => <option key={m.id} value={m.id}>{m.name} ({m.id})</option>)}
+                    </optgroup>
+                  )
+                })}
+              </select>
             </div>
-            <div>Status: {j.status}</div>
-            <div>PR: {j.pr_url ? <a href={j.pr_url} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{j.pr_url}</a> : '\u2014'}</div>
-            <div>Deploy: {j.deployment_url ? <a href={`https://${j.deployment_url}`} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{j.deployment_url}</a> : '\u2014'}</div>
-            <div>Deploy state: {j.deployment_state || '\u2014'}</div>
+
+            <button onClick={submit} style={btn}>Queue job</button>
           </div>
-        ))}
-      </div>
+
+          {result && <pre style={pre}>{JSON.stringify(result, null, 2)}</pre>}
+
+          <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
+            {jobs.map(j => (
+              <div key={j.id} style={card}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <strong>{j.app_name}</strong>
+                  {j.model && <span style={{ fontSize: 12, color: '#64748b', background: '#1e293b', padding: '2px 8px', borderRadius: 8 }}>{j.model}</span>}
+                </div>
+                <div>Status: {j.status}</div>
+                <div>PR: {j.pr_url ? <a href={j.pr_url} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{j.pr_url}</a> : '\u2014'}</div>
+                <div>Deploy: {j.deployment_url ? <a href={`https://${j.deployment_url}`} target="_blank" rel="noreferrer" style={{ color: '#38bdf8' }}>{j.deployment_url}</a> : '\u2014'}</div>
+                <div>Deploy state: {j.deployment_state || '\u2014'}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Invoice Generator */}
+          <div style={card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: 20, color: '#e2e8f0' }}>AI Invoice Generator</h2>
+              {invoiceCredits && (
+                <span style={{ fontSize: 13, color: '#94a3b8' }}>
+                  Credits: <strong style={{ color: '#38bdf8' }}>
+                    {invoiceCredits.credits_remaining === 'unlimited' ? 'Unlimited' : invoiceCredits.credits_remaining}
+                  </strong>
+                  {invoiceCredits.credits_used > 0 && ` (${invoiceCredits.credits_used} used this month)`}
+                </span>
+              )}
+            </div>
+
+            <p style={{ margin: 0, color: '#94a3b8', fontSize: 14 }}>
+              Paste your client and project details below. AI will structure the data and generate a professional PDF invoice.
+            </p>
+
+            <textarea
+              value={invoiceInput}
+              onChange={e => setInvoiceInput(e.target.value)}
+              rows={10}
+              style={field}
+              placeholder={`Example:\nBill from: Acme Web Studio, 123 Main St, Springfield IL\nBill to: Client Corp, 456 Oak Ave, Chicago IL\n\nProject: E-commerce website redesign\n- UI/UX Design: 20 hours @ $150/hr\n- Frontend Development: 40 hours @ $175/hr\n- Backend API: 30 hours @ $175/hr\n- QA Testing: 10 hours @ $100/hr\n\nDue: Net 30\nNotes: Thank you for your business!`}
+            />
+
+            {invoiceError && (
+              <div style={{ color: '#ef4444', fontSize: 14, padding: '8px 12px', background: '#1c1917', borderRadius: 8 }}>
+                {invoiceError}
+              </div>
+            )}
+
+            <button
+              onClick={generateInvoice}
+              disabled={invoiceLoading}
+              style={{ ...btn, background: '#22c55e', color: '#fff' }}
+            >
+              {invoiceLoading ? 'Generating invoice...' : 'Generate Invoice (1 credit)'}
+            </button>
+          </div>
+
+          {invoiceResult && (
+            <div style={{ ...card, marginTop: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, color: '#e2e8f0' }}>Invoice Generated</h3>
+                <button onClick={downloadPdf} style={{ ...btn, background: '#38bdf8' }}>
+                  Download PDF
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 8 }}>
+                <div>
+                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>Invoice #</div>
+                  <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{(invoiceResult.invoice_data as Record<string, string>).invoice_number}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>Due Date</div>
+                  <div style={{ color: '#e2e8f0', fontWeight: 600 }}>{(invoiceResult.invoice_data as Record<string, string>).due_date}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>From</div>
+                  <div style={{ color: '#e2e8f0' }}>{(invoiceResult.invoice_data as Record<string, string>).from_name}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 4 }}>To</div>
+                  <div style={{ color: '#e2e8f0' }}>{(invoiceResult.invoice_data as Record<string, string>).to_name}</div>
+                </div>
+              </div>
+
+              {Array.isArray((invoiceResult.invoice_data as Record<string, unknown>).line_items) && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ color: '#94a3b8', fontSize: 12, marginBottom: 8 }}>Line Items</div>
+                  <div style={{ display: 'grid', gap: 4 }}>
+                    {((invoiceResult.invoice_data as Record<string, unknown>).line_items as Array<{description: string; quantity: number; unit_price: number}>).map((item, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#cbd5e1', padding: '4px 0', borderBottom: '1px solid #1e293b' }}>
+                        <span>{item.description}</span>
+                        <span>{item.quantity} x ${item.unit_price.toFixed(2)} = ${(item.quantity * item.unit_price).toFixed(2)}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, color: '#38bdf8', padding: '8px 0' }}>
+                      <span>Total</span>
+                      <span>${((invoiceResult.invoice_data as Record<string, unknown>).line_items as Array<{quantity: number; unit_price: number}>).reduce((s, it) => s + it.quantity * it.unit_price, 0).toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ fontSize: 12, color: '#64748b', marginTop: 8 }}>
+                Credits remaining: {invoiceResult.credits_remaining === 'unlimited' ? 'Unlimited' : invoiceResult.credits_remaining}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </main>
   )
 }
