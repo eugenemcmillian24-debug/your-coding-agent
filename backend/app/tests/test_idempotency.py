@@ -9,7 +9,7 @@ def test_idempotency_reserve_once(monkeypatch):
         def __enter__(self): return self
         def __exit__(self, *args): pass
         def execute(self, sql, params=None):
-            if 'SELECT * FROM idempotency_records' in sql:
+            if 'SELECT' in sql and 'idempotency_records' in sql:
                 return FakeSelect(params[0])
             if 'INSERT INTO idempotency_records' in sql:
                 calls['seen'].add(params[2])
