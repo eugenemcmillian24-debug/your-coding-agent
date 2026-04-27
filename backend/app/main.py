@@ -5,10 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routes import jobs, webhooks, admin
 from .routes.stripe_routes import router as stripe_router
 from .routes.invoice_routes import router as invoice_router
+from .routes.workspace_routes import router as workspace_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
-app = FastAPI(title="Forge Agent", version="24.0.0")
+app = FastAPI(title="Forge Agent", version="25.0.0")
 
 allowed_origins = [
     "http://localhost:3000",
@@ -30,8 +31,9 @@ app.include_router(webhooks.router, prefix="/api/webhooks", tags=["webhooks"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(stripe_router, prefix="/api/stripe", tags=["stripe"])
 app.include_router(invoice_router, prefix="/api/invoice", tags=["invoice"])
+app.include_router(workspace_router, prefix="/api/workspace", tags=["workspace"])
 
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "version": "24.0.0"}
+    return {"ok": True, "version": "25.0.0"}

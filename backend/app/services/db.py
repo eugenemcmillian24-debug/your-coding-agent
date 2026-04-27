@@ -156,6 +156,21 @@ def init_db():
                 CREATE INDEX IF NOT EXISTS idx_invoice_generations_email
                     ON invoice_generations(user_email)
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS workspaces (
+                    id TEXT PRIMARY KEY,
+                    user_email TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    files JSONB NOT NULL DEFAULT '{}'::jsonb,
+                    chat_history JSONB NOT NULL DEFAULT '[]'::jsonb,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_workspaces_user_email
+                    ON workspaces(user_email)
+            """)
             logger.info("Database tables initialized")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
