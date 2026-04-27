@@ -57,6 +57,7 @@ def init_db():
                     app_name TEXT NOT NULL,
                     prompt TEXT NOT NULL,
                     provider TEXT NOT NULL,
+                    model TEXT,
                     status TEXT NOT NULL DEFAULT 'queued',
                     repo_name TEXT,
                     branch_name TEXT,
