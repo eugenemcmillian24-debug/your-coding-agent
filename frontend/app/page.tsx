@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { User, Session } from '@supabase/supabase-js'
+import type { User } from '@supabase/supabase-js'
 
 const API = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000'
 
@@ -38,8 +38,8 @@ export default function Home() {
   const [sessionLoading, setSessionLoading] = useState(true)
 
   // Builder state
-  const [appName, setAppName] = useState('Real Integration Builder')
-  const [prompt, setPrompt] = useState('Build and deploy a real integrated app.')
+  const [appName, setAppName] = useState('')
+  const [prompt, setPrompt] = useState('')
   const [models, setModels] = useState<Model[]>([])
   const [selectedModel, setSelectedModel] = useState('')
   const [jobs, setJobs] = useState<Job[]>([])
