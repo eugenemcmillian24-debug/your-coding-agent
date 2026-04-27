@@ -4,10 +4,13 @@ def test_validate_env_missing(monkeypatch):
     keys = [
         'DATABASE_URL','REDIS_URL','DEFAULT_PROVIDER','GITHUB_TOKEN','GITHUB_OWNER',
         'GITHUB_WEBHOOK_SECRET','CLOUDFLARE_API_TOKEN','CLOUDFLARE_ACCOUNT_ID',
-        'CLOUDFLARE_WEBHOOK_SECRET',
+        'CLOUDFLARE_WEBHOOK_SECRET','STRIPE_SECRET_KEY','STRIPE_WEBHOOK_SECRET',
+        'FRONTEND_URL',
     ]
     for key in keys:
         monkeypatch.delenv(key, raising=False)
     missing = validate_env()
     assert 'DATABASE_URL' in missing
     assert 'CLOUDFLARE_API_TOKEN' in missing
+    assert 'STRIPE_SECRET_KEY' in missing
+    assert 'FRONTEND_URL' in missing
