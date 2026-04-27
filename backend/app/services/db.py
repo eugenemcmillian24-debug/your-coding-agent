@@ -143,6 +143,19 @@ def init_db():
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_subscriptions_subscription_id ON subscriptions(subscription_id)
             """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS invoice_generations (
+                    id TEXT PRIMARY KEY,
+                    user_email TEXT NOT NULL,
+                    invoice_data JSONB NOT NULL DEFAULT '{}'::jsonb,
+                    pdf_bytes BYTEA,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_invoice_generations_email
+                    ON invoice_generations(user_email)
+            """)
             logger.info("Database tables initialized")
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
