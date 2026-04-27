@@ -13,6 +13,9 @@ def required_env_keys() -> List[str]:
         "CLOUDFLARE_API_TOKEN",
         "CLOUDFLARE_ACCOUNT_ID",
         "CLOUDFLARE_WEBHOOK_SECRET",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "FRONTEND_URL",
     ]
 
 
@@ -20,7 +23,7 @@ def optional_env_keys() -> List[str]:
     """Keys that are useful but not required for startup."""
     return [
         "DIRECT_DATABASE_URL",
-        "FRONTEND_URL",
+        "ADMIN_EMAILS",
         "SUPABASE_URL",
         "SUPABASE_ANON_KEY",
         "SUPABASE_SERVICE_ROLE_KEY",
